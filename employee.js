@@ -6,6 +6,7 @@ class EmployeePayroll {
     this.empName = empName;
     this.attendance = "";
     this.dailyWage = 0;
+    this.workingHours = 0; // UC3 - Adding working hours property
   }
  
   displayMessage() {
@@ -13,24 +14,28 @@ class EmployeePayroll {
   }
   // Method to mark attendance randomly
   markAttendance() {
-    let isPresent = Math.floor(Math.random() * 2);
-    this.attendance = isPresent ? "Present" : "Absent";
+    let attendanceType = Math.floor(Math.random() * 3); //calculating random attendance and checking for full time 
+    if(attendanceType === 0) {
+      this.attendance = "Absent"; // Absent
+      this.workingHours = 0; // UC3 - Setting working hours 0 for Absent
+    }
+    else if(attendanceType === 1) {
+      this.attendance = "Present"; // Present
+      this.workingHours = 8; // UC3 - Setting working hours to 8 for Present
+    } else {
+      this.attendance = "Half Day"; // Half Day
+      this.workingHours = 4; // UC3 - Setting working hours to 4 for Half Day
+    }
   }
   //UC2 - For calculating daily wage based on attendance
   calculateWage() {
     const WAGE_PER_HOUR = 20;
-    const WORKING_HOURS = 8;
-    const dailyWage = WAGE_PER_HOUR * WORKING_HOURS;
-    if(this.attendance === "Present") {
-      this.dailyWage = dailyWage;
-    } else {
-      this.dailyWage = 0;
-    }
+    this.dailyWage = WAGE_PER_HOUR * this.workingHours; // Calculate daily wage based on working hours
   }
   // method to display employee details
   displayDetails() {
     console.log(
-      `Employee ID: ${this.empId}, Name: ${this.empName}, Attendance: ${this.attendance}, Daily Wage: ${this.dailyWage}`
+      `Employee ID: ${this.empId}, Name: ${this.empName}, Attendance: ${this.attendance}, Working Hours: ${this.workingHours}, Daily Wage: ${this.dailyWage}` // UC3 - Displaying working hours
     );
   }
 }
