@@ -15,16 +15,21 @@ class EmployeePayroll {
   // Method to mark attendance randomly
   markAttendance() {
     let attendanceType = Math.floor(Math.random() * 3); //calculating random attendance and checking for full time 
-    if(attendanceType === 0) {
-      this.attendance = "Absent"; // Absent
-      this.workingHours = 0; // UC3 - Setting working hours 0 for Absent
-    }
-    else if(attendanceType === 1) {
-      this.attendance = "Present"; // Present
-      this.workingHours = 8; // UC3 - Setting working hours to 8 for Present
-    } else {
-      this.attendance = "Half Day"; // Half Day
-      this.workingHours = 4; // UC3 - Setting working hours to 4 for Half Day
+    switch (attendanceType) {
+        case 0:
+            this.attendance = "Absent"; // UC1 - Marking attendance as Absent
+            this.workingHours = 0; // No working hours if absent
+            break;
+        case 1:
+            this.attendance = "Part-Time"; // UC1 - Marking attendance as Part-Time
+            this.workingHours = 4; // Assuming part-time is 4 hours
+            break;
+        case 2:
+            this.attendance = "Full-Time"; // UC1 - Marking attendance as Full-Time
+            this.workingHours = 8; // Assuming full-time is 8 hours
+            break;
+        default:
+            break;
     }
   }
   //UC2 - For calculating daily wage based on attendance
@@ -50,7 +55,7 @@ let empDetails = [
 // Mark attendance for each employee and display their details
 empDetails.forEach((employee) => {
   employee.markAttendance();
-  employee.calculateWage(); //UC2 Implementing calculateWage method
+  employee.calculateWage(); //UC2+UC3 Implemented calculateWage method along with part-time wage
   employee.displayDetails();
 });
  
