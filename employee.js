@@ -7,6 +7,9 @@ class EmployeePayroll {
     this.attendance = "";
     this.dailyWage = 0;
     this.workingHours = 0; // UC3 - Adding working hours property
+    // UC4 - Monthly Wage Tracking
+    this.totalWage = 0; // Total wage for the month
+    this.totalWorkingHours = 0; // Total working hours for the month
   }
  
   displayMessage() {
@@ -36,13 +39,22 @@ class EmployeePayroll {
   calculateWage() {
     const WAGE_PER_HOUR = 20;
     this.dailyWage = WAGE_PER_HOUR * this.workingHours; // Calculate daily wage based on working hours
+    this.totalWage += this.dailyWage; //UC4- Update total wage for the month
+    this.totalWorkingHours += this.workingHours; //UC4- Update total working hours for the month
   }
   // method to display employee details
-  displayDetails() {
+  displayDetails(day) {
     console.log(
-      `Employee ID: ${this.empId}, Name: ${this.empName}, Attendance: ${this.attendance}, Working Hours: ${this.workingHours}, Daily Wage: ${this.dailyWage}` // UC3 - Displaying working hours
+      `Day ${day} - Employee ID: ${this.empId}, Name: ${this.empName}, Attendance: ${this.attendance}, Working Hours: ${this.workingHours}, Daily Wage: ${this.dailyWage}` // UC3 - Displaying working hours
     );
   }
+    // UC4 - Display monthly summary
+    displayMonthlySummary() {
+        console.log(`\n Monthly Summary for ${this.empName} (ID: ${this.empId}):`);
+        console.log(`Total Working Hours: ${this.totalWorkingHours}`);
+        console.log(`Total Wage for the Month: ₹${this.totalWage}`);
+        console.log(`----------------------------------------------`);
+    }
 }
 const employeePayroll = new EmployeePayroll();
 employeePayroll.displayMessage();
@@ -52,10 +64,18 @@ let empDetails = [
   new EmployeePayroll(41, "Deepika"),
   new EmployeePayroll(12, "Lakshmi"),
 ];
+const Working_Days = 20; // Assuming 20 working days in a month
+
 // Mark attendance for each employee and display their details
 empDetails.forEach((employee) => {
-  employee.markAttendance();
-  employee.calculateWage(); //UC2+UC3 Implemented calculateWage method along with part-time wage
-  employee.displayDetails();
+    console.log(`Daily details of Employee : ${employee.empName}`);
+    for (let day = 1; day <= Working_Days; day++) {
+        employee.markAttendance(); // UC1 - Mark attendance randomly
+        employee.calculateWage(); // UC2 - Calculate daily wage based on attendance
+        employee.displayDetails(day); // UC3 - Display daily details
+    }
+    employee.displayMonthlySummary(); // UC4 - Display monthly summary
+    console.log("--------------------------------------------------");
+    
 });
  
