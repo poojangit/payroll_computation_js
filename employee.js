@@ -45,12 +45,12 @@ class EmployeePayroll {
       this.totalWorkingDays++; //UC4- Increment total working days if not absent
     }
   }
+
   // method to display employee details
   displayDetails(day) {
-    console.log(
-      `Day ${day} - Attendance: ${this.attendance}, Working Hours: ${this.workingHours}, Daily Wage: ${this.dailyWage}` // UC3 - Displaying working hours
-    );
+     console.log(`Day ${day} - Attendance: ${this.attendance}, Working Hours: ${this.workingHours}, Daily Wage: ${this.dailyWage}` );// UC3 - Displaying working hours
   }
+
   // UC4 - Display monthly summary
   displayMonthlySummary(companyName) {
     console.log(`----------------------------------------------`);
@@ -63,7 +63,8 @@ class EmployeePayroll {
     console.log();
   }
 }
-class EmpWageBuilder {
+
+class CompanyEmpWage {
   constructor(companyName, wagePerHour, maxWorkingDays, maxWorkingHours) {
     this.companyName = companyName;
     this.wagePerHour = wagePerHour;
@@ -83,7 +84,7 @@ class EmpWageBuilder {
 
     // Mark attendance for each employee and display their details
     this.employeeeDetailsList.forEach((employee) => {
-      console.log(`\n----------------------------------------------`);
+      console.log(`----------------------------------------------`);
       console.log(
         `Daily details of Employee : ${employee.empName} with ID: ${employee.empId}`
       );
@@ -107,18 +108,33 @@ class EmpWageBuilder {
       `Total wage for company ${this.companyName} is: ₹${this.totalCompanyWage}`
     );
   }
+  
+}
+
+class EmpWageBuilder {
+  constructor() {
+    this.companies = []; // List to store companies
+  }
+  addCompany(company) {
+    this.companies.push(company); // Add company to the list
+  }
+  computeAllCompanyWages() {
+    this.companies.forEach((company) => {
+      company.computeWagesForCompany(); // Compute wages for each company
+    })
+  }
 }
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
 });
 
-let companyList = []; // List to store company details
 let totalCompanies = 0;
 let currentCompany = 0;
 let currentBuilder = null;
 let numberOfEmployees = 0
 let employeeIndex = 0;
+let builder = new EmpWageBuilder(); // Create an instance of EmpWageBuilder
 
 function askTotalCompanies() {
   rl.question("How many companies you want to add?: ", (count) => {
@@ -133,7 +149,7 @@ function askTotalCompanies() {
         rl.question("Enter wage per hour: ", (wage) => {
           rl.question("Enter Max Working Days: ", (days) => {
             rl.question("Enter Max Working Hours: ", (hours) => {
-              currentBuilder = new EmpWageBuilder(
+              currentBuilder = new CompanyEmpWage(
                 name,
                 parseInt(wage),
                 parseInt(days),
@@ -160,28 +176,22 @@ function askTotalCompanies() {
 
   function askEmployeeDetails() {
     if (employeeIndex < numberOfEmployees) {
-      rl.question(
-        `Enter Employee ID for Employee ${employeeIndex + 1}: `,
-        (empId) => {
-          rl.question(
-            `Enter Employee Name for Employee ${employeeIndex + 1}: `,
-            (empName) => {
+      rl.question(`Enter Employee ID for Employee ${employeeIndex + 1}: `,(empId) => {
+          rl.question(`Enter Employee Name for Employee ${employeeIndex + 1}: `,(empName) => {
               currentBuilder.addEmployee(parseInt(empId), empName);
               employeeIndex++;
               askEmployeeDetails(); // Ask for next employee details
             });
         });
     } else {
-      companyList.push(currentBuilder); // Add company details to the list
+      builder.addCompany(currentBuilder); // Add the current company to the list
       currentCompany++; // Move to the next company
       askCompanyDetails(); // Ask for next company details
     }
   }
   function startApplication() {
     EmployeePayroll.displayMessage(); // Display welcome message
-    companyList.forEach((builder) => {
-      builder.computeWagesForCompany() // Compute wages for each company
-    });
+    builder.computeAllCompanyWages(); // Compute wages for all companies
   }
 }
 //Entry point of the application
