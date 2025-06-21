@@ -1,7 +1,6 @@
 // Employee Payroll Application
 import readline from "readline";
 class EmployeePayroll {
-
   // Constructor to initialize employee details
   constructor(empId, empName) {
     this.empId = empId;
@@ -55,38 +54,58 @@ class EmployeePayroll {
   // UC4 - Display monthly summary
   displayMonthlySummary(companyName) {
     console.log(`----------------------------------------------`);
-    console.log(`\n Monthly Summary for ${this.empName} (ID: ${this.empId}) at ${companyName} Company:`);
+    console.log(
+      `\n Monthly Summary for ${this.empName} (ID: ${this.empId}) at ${companyName} Company:`
+    );
     console.log(`Total Working Hours: ${this.totalWorkingHours}`);
     console.log(`Total Working Days: ${this.totalWorkingDays}`);
-    console.log(`Total Wage for the Month: ₹${this.totalWage}`);
+    console.log(`Total Wage: ₹${this.totalWage}`);
     console.log();
   }
+}
+class EmpWageBuilder {
+  constructor(companyName, wagePerHour, maxWorkingDays, maxWorkingHours) {
+    this.companyName = companyName;
+    this.wagePerHour = wagePerHour;
+    this.maxWorkingDays = maxWorkingDays;
+    this.maxWorkingHours = maxWorkingHours;
+    this.employeeeDetailsList = []; // List to store employee details
+    this.totalCompanyWage = 0; // Total wage for the company
+  }
+  // Method to add employee details
+  addEmployee(empId, empName) {
+    const employee = new EmployeePayroll(empId, empName);
+    this.employeeeDetailsList.push(employee);
+  }
   // UC7 - Static method to compute wages for all employees
-  static computeWagesForAll(employeeeDetailsList, companyName, wagePerHour, maxWorkingDays, maxWorkingHours ) {
-    console.log(`\nCalculating wages for company:  ${companyName}\n `);
-    
+  computeWagesForCompany() {
+    console.log(`\nCalculated wages for company:  ${this.companyName}\n `);
+
     // Mark attendance for each employee and display their details
-    employeeeDetailsList.forEach((employee) => {
-      console.log(`----------------------------------------------`);
+    this.employeeeDetailsList.forEach((employee) => {
+      console.log(`\n----------------------------------------------`);
       console.log(
         `Daily details of Employee : ${employee.empName} with ID: ${employee.empId}`
       );
       console.log(`----------------------------------------------`);
-      let day = 1; // Initialize day counter
-
+      let day = 1;
       while (
-        day <= maxWorkingDays &&
-        employee.totalWorkingHours < maxWorkingHours
+        day <= this.maxWorkingDays &&
+        employee.totalWorkingHours < this.maxWorkingHours
       ) {
         // Loop until max working hours or days
         employee.markAttendance(); // UC1 - Mark attendance randomly
-        employee.calculateWage(wagePerHour); //UC8 - implementing calculateWage method
+        employee.calculateWage(this.wagePerHour); //UC8 - implementing calculateWage method
         employee.displayDetails(day); // UC3 - Display daily details
         day++; // Increment day counter
       }
 
-      employee.displayMonthlySummary(companyName); // UC4 - Display monthly summary
+      employee.displayMonthlySummary(this.companyName); // UC4 - Display monthly summary
+      this.totalCompanyWage += employee.totalWage; // Update total company wage
     });
+    console.log(
+      `Total wage for company ${this.companyName} is: ₹${this.totalCompanyWage}`
+    );
   }
 }
 const rl = readline.createInterface({
@@ -94,56 +113,77 @@ const rl = readline.createInterface({
   output: process.stdout,
 });
 
-//create employee objects
-let empDetails = [];
-let numberOfEmployees = 0;
-let count = 0;
-let companyName = "";
-let wagePerHour = 0
-let maxWorkingDays = 0
-let maxWorkingHours = 0
+let companyList = []; // List to store company details
+let totalCompanies = 0;
+let currentCompany = 0;
+let currentBuilder = null;
+let numberOfEmployees = 0
+let employeeIndex = 0;
 
-function askCompanyDetails(){
-    rl.question("Enter Company Name: ", (name) => {
-        console.log(`Welcome to ${companyName} Employee Payroll Application\n`);
-        companyName = name; // Store company name
+function askTotalCompanies() {
+  rl.question("How many companies you want to add?: ", (count) => {
+      totalCompanies = parseInt(count);
+      askCompanyDetails();
+    })
+
+  function askCompanyDetails() {
+    if (currentCompany < totalCompanies) {
+      console.log( `\n ---Entering details of company ${currentCompany + 1}---\n`);
+      rl.question("Enter Company Name: ", (name) => {
         rl.question("Enter wage per hour: ", (wage) => {
-            wagePerHour = parseInt(wage);
-            rl.question("Enter Max Working Days: ", (days) => {
-                maxWorkingDays = parseInt(days);
-                rl.question("Enter Max Working Hours: ", (hours) => {
-                    maxWorkingHours = parseInt(hours);
-                   askEmployeeCount(); // Start asking for employee count after company details
-                });
-            })
-        })
+          rl.question("Enter Max Working Days: ", (days) => {
+            rl.question("Enter Max Working Hours: ", (hours) => {
+              currentBuilder = new EmpWageBuilder(
+                name,
+                parseInt(wage),
+                parseInt(days),
+                parseInt(hours)
+              );
+              askEmployeeCount();
+            });
+          });
+        });
+      });
+    } else {
+      rl.close(); // Close readline interface after collecting all employee details
+      startApplication(); // Start the application after collecting employee details
+    }
+  }
+
+  function askEmployeeCount() {
+    rl.question("How many employees you want to add?: ", (count) => {
+      numberOfEmployees = parseInt(count);
+      employeeIndex = 0;
+      askEmployeeDetails();
     });
-}
-function askEmployeeCount() {
-  rl.question("How many employees you want to add?: ", (answer) => {
-    numberOfEmployees = parseInt(answer);
-    askEmployeeDetails();
-  });
-}
-function askEmployeeDetails() {
-  if (count < numberOfEmployees) {
-    rl.question(`Enter Employee ID for Employee ${count + 1}: `, (empId) => {
+  }
+
+  function askEmployeeDetails() {
+    if (employeeIndex < numberOfEmployees) {
       rl.question(
-        `Enter Employee Name for Employee ${count + 1}: `,
-        (empName) => {
-          empDetails.push(new EmployeePayroll(parseInt(empId), empName)); // Create new employee object and add to array
-          count++;
-          askEmployeeDetails(); // Ask for next employee details
-        }
-      );
+        `Enter Employee ID for Employee ${employeeIndex + 1}: `,
+        (empId) => {
+          rl.question(
+            `Enter Employee Name for Employee ${employeeIndex + 1}: `,
+            (empName) => {
+              currentBuilder.addEmployee(parseInt(empId), empName);
+              employeeIndex++;
+              askEmployeeDetails(); // Ask for next employee details
+            });
+        });
+    } else {
+      companyList.push(currentBuilder); // Add company details to the list
+      currentCompany++; // Move to the next company
+      askCompanyDetails(); // Ask for next company details
+    }
+  }
+  function startApplication() {
+    EmployeePayroll.displayMessage(); // Display welcome message
+    companyList.forEach((builder) => {
+      builder.computeWagesForCompany() // Compute wages for each company
     });
-  } else {
-    rl.close(); // Close readline interface after collecting all employee details
-    startApplication(); // Start the application after collecting employee details
   }
 }
-function startApplication() {
-    EmployeePayroll.computeWagesForAll(empDetails, companyName, wagePerHour, maxWorkingDays, maxWorkingHours); // Compute wages for all employees
-}
+//Entry point of the application
 EmployeePayroll.displayMessage();
-askCompanyDetails(); // Start asking for company details
+askTotalCompanies(); // Start asking for company details
