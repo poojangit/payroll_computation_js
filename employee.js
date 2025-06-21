@@ -1,11 +1,6 @@
 // Employee Payroll Application
-import { log } from "console";
 import readline from "readline";
 class EmployeePayroll {
-  //UC7 - Refactor the code to write class variables and methods
-  static MAX_WORKING_DAYS = 20 ; 
-  static MAX_WORKING_HOURS = 100;
-  static WAGE_PER_HOUR = 20;
 
   // Constructor to initialize employee details
   constructor(empId, empName) {
@@ -43,8 +38,8 @@ class EmployeePayroll {
     }
   }
   //UC2 - For calculating daily wage based on attendance
-  calculateWage() {
-    this.dailyWage = EmployeePayroll.WAGE_PER_HOUR * this.workingHours; // Calculate daily wage based on working hours
+  calculateWage(wagePerHour) {
+    this.dailyWage = wagePerHour * this.workingHours; // Calculate daily wage based on working hours
     this.totalWage += this.dailyWage; //UC4- Update total wage for the month
     this.totalWorkingHours += this.workingHours; //UC4- Update total working hours for the month
     if (this.attendance !== "Absent") {
@@ -58,16 +53,18 @@ class EmployeePayroll {
     );
   }
   // UC4 - Display monthly summary
-  displayMonthlySummary() {
+  displayMonthlySummary(companyName) {
     console.log(`----------------------------------------------`);
-    console.log(`\n Monthly Summary for ${this.empName} (ID: ${this.empId}):`);
+    console.log(`\n Monthly Summary for ${this.empName} (ID: ${this.empId}) at ${companyName} Company:`);
     console.log(`Total Working Hours: ${this.totalWorkingHours}`);
     console.log(`Total Working Days: ${this.totalWorkingDays}`);
     console.log(`Total Wage for the Month: ₹${this.totalWage}`);
     console.log();
   }
   // UC7 - Static method to compute wages for all employees
-  static computeWagesForAll(employeeeDetailsList) {
+  static computeWagesForAll(employeeeDetailsList, companyName, wagePerHour, maxWorkingDays, maxWorkingHours ) {
+    console.log(`\nCalculating wages for company:  ${companyName}\n `);
+    
     // Mark attendance for each employee and display their details
     employeeeDetailsList.forEach((employee) => {
       console.log(`----------------------------------------------`);
@@ -78,17 +75,17 @@ class EmployeePayroll {
       let day = 1; // Initialize day counter
 
       while (
-        day <= EmployeePayroll.MAX_WORKING_DAYS &&
-        employee.totalWorkingHours < EmployeePayroll.MAX_WORKING_HOURS
+        day <= maxWorkingDays &&
+        employee.totalWorkingHours < maxWorkingHours
       ) {
         // Loop until max working hours or days
         employee.markAttendance(); // UC1 - Mark attendance randomly
-        employee.calculateWage(); // UC2 - Calculate daily wage based on attendance
+        employee.calculateWage(wagePerHour); //UC8 - implementing calculateWage method
         employee.displayDetails(day); // UC3 - Display daily details
         day++; // Increment day counter
       }
 
-      employee.displayMonthlySummary(); // UC4 - Display monthly summary
+      employee.displayMonthlySummary(companyName); // UC4 - Display monthly summary
     });
   }
 }
@@ -101,7 +98,27 @@ const rl = readline.createInterface({
 let empDetails = [];
 let numberOfEmployees = 0;
 let count = 0;
+let companyName = "";
+let wagePerHour = 0
+let maxWorkingDays = 0
+let maxWorkingHours = 0
 
+function askCompanyDetails(){
+    rl.question("Enter Company Name: ", (name) => {
+        console.log(`Welcome to ${companyName} Employee Payroll Application\n`);
+        companyName = name; // Store company name
+        rl.question("Enter wage per hour: ", (wage) => {
+            wagePerHour = parseInt(wage);
+            rl.question("Enter Max Working Days: ", (days) => {
+                maxWorkingDays = parseInt(days);
+                rl.question("Enter Max Working Hours: ", (hours) => {
+                    maxWorkingHours = parseInt(hours);
+                   askEmployeeCount(); // Start asking for employee count after company details
+                });
+            })
+        })
+    });
+}
 function askEmployeeCount() {
   rl.question("How many employees you want to add?: ", (answer) => {
     numberOfEmployees = parseInt(answer);
@@ -126,7 +143,7 @@ function askEmployeeDetails() {
   }
 }
 function startApplication() {
-    EmployeePayroll.computeWagesForAll(empDetails); // Compute wages for all employees
+    EmployeePayroll.computeWagesForAll(empDetails, companyName, wagePerHour, maxWorkingDays, maxWorkingHours); // Compute wages for all employees
 }
 EmployeePayroll.displayMessage();
-askEmployeeCount(); // Start asking for employee count
+askCompanyDetails(); // Start asking for company details
